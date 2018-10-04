@@ -24,7 +24,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var monitor, rancher bool
+var monitor, rancher, pumba bool
 
 // addonCmd represents the addon command
 var addonCmd = &cobra.Command{
@@ -85,6 +85,42 @@ Zipkin, Kibana, Load Testing As A Service`,
 			}
 			cmdSet.Wait()
 			fmt.Println(cmdOut)
+			os.Exit(0)
+		}
+
+		if pumba {
+			pumba_default_config := "https://raw.githubusercontent.com/iamShantanu101/tk8/pumba-chaos/addons/pumba/pumba-config.yml"
+			// Get kubeconfig file location
+			fmt.Println("Please enter the path to your kubeconfig")
+			var kubeConfig string
+			fmt.Scanln(&kubeConfig)
+
+			if _, err := os.Stat(kubeConfig); err != nil {
+				fmt.Println("Kubeconfig not found, kindly check")
+				os.Exit(1)
+			}
+
+			// check if kubectl is installed
+			kerr, err := exec.LookPath("kubectl")
+			if err != nil {
+				log.Fatal("kubectl command not found, kindly check")
+			}
+			fmt.Printf("Found kubectl at %s\n", kerr)
+			rr, err := exec.Command("kubectl", "--kubeconfig", kubeConfig, "version", "--short").Output()
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf(string(rr))
+
+			PumbaDeploy := exec.Command("kubectl", "--kubeconfig", kubeConfig, "create", "-f", pumba_default_config)
+			stdout, _ := PumbaDeploy.StdoutPipe()
+			PumbaDeploy.Start()
+			scanner := bufio.NewScanner(stdout)
+			for scanner.Scan() {
+				m := scanner.Text()
+				fmt.Println(m)
+			}
+			PumbaDeploy.Wait()
 			os.Exit(0)
 		}
 
@@ -177,4 +213,6 @@ func init() {
 
 	addonCmd.Flags().BoolVarP(&monitor, "monitor", "m", false, "Deploy Monitoring and Alerting")
 	addonCmd.Flags().BoolVarP(&rancher, "rancher", "r", false, "Deploy Rancher")
+	addonCmd.Flags().BoolVarP(&pumba, "pumba", "p", false, "Deploy Pumba chaos engineering tool")
+
 }
