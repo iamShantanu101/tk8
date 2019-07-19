@@ -1,4 +1,4 @@
-// Copyright © 2018 NAME HERE <EMAIL ADDRESS>
+// Copyright © 2018 The TK8 Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package templates
 
-import "github.com/kubernauts/tk8/cmd/cli"
-
-func main() {
-	cmd.Execute()
-}
+var Credentials = `
+AWS_ACCESS_KEY_ID = "{{.AwsAccessKeyID}}"
+AWS_SECRET_ACCESS_KEY = "{{.AwsSecretKey}}"
+AWS_SSH_KEY_NAME = "{{.AwsAccessSSHKey}}"
+AWS_DEFAULT_REGION = "{{.AwsDefaultRegion}}"
+`

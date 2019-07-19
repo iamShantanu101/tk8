@@ -1,104 +1,120 @@
 ![Logo](docs/images/tk8.png)
 
-# TK8: A multi-cloud, multi-cluster Kubernetes platform installation and integration tool based on Kubespray!
+# TK8: A multi-cloud, multi-cluster Kubernetes platform installation and integration tool
 
-TK8 is a CLI written in Golang to deploy the upstream Vanilla Kubernetes fully automated based on [Kubespray](https://github.com/kubernetes-incubator/kubespray) on any environment. **We'll provide kubeadm support as soon kubeadm HA support is available through Kubespray project.**
+TK8 is a command line tool written in Go. It fully automatates the installation of Kubernetes on any environment. With TK8, you are able to centrally manage different Kubernetes clusters with different configurations. In addition, TK8 with its simple add-on integration offers the possibility to quickly, cleanly and easily distribute extensions to the different Kubernetes clusters.
 
-With TK8 you can also install additional add-ons such as a Jmeter Cluster for load testing, Prometheus for monitoring, Jaeger, Linkerd or Zippkin for tracing, Ambassador API Gateway with Envoy for ingress and load balancing, Istio for service mesh support , Jenkins-X for CI/CD and Helm or Kedge for packaging on Kubernetes.
+These include a Jmeter cluster for load testing, Prometheus for monitoring, Jaeger, Linkerd or Zippkin for tracing, Ambassador API Gateway with Envoy for Ingress and Load Balancing, Istio as mesh support solution, Jenkins-X for CI/CD integration. In addition, the add-on system also supports the management of Helm packages.
 
-This release supports the Kubernetes installation on AWS and OpenStack / Bare-Metal with HA capabilities.
+## Table of contents
 
-N.B: MS Azure and GCP support will be added in the very near future.
+The documentation as well as a detailed table of contents can be found here.
+
+* [Table of content](docs/en/SUMMARY.md)
 
 ## Installation
 
-### Building from source
+The TK8 CLI requires some dependencies to perform its tasks.
+At the moment we still need your help here, but we are working on a setup script that will do these tasks for you.
 
-```shell
-go get -u github.com/kubernauts/tk8
-```
+### Terraform
 
-### Docker image
+Terraform is required to automatically set up the infrastructure in the desired environment.
+[Terraform Installation](https://www.terraform.io/intro/getting-started/install.html)
 
-```shell
-docker pull kubernautslabs/tk8
-```
+### Ansible
+
+Ansible is required to run the automated installation routines in the desired and created environment.
+[Ansible Installation](https://docs.ansible.com/ansible/2.5/installation_guide/intro_installation.html#installing-the-control-machine)
+
+### Kubectl
+
+Kubectl is needed by the CLI to roll out the add-ons and by you to access your clusters.
+[Kubectl Installation](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+
+### Python and pip
+
+In the automated routines Python scripts are used which uses Pip to load its dependencies.
+[Python Installation](https://www.python.org/downloads/)
+[pip Installation](https://pip.pypa.io/en/stable/installing/)
+
+### AWS IAM Authenticator
+
+If you want to install an EKS cluster with TK8, the [AWS IAM Authenticator](https://github.com/kubernetes-sigs/aws-iam-authenticator) needs to be available on your system and must be executable `(chmod +x <path-to-binary>)`. It is preffered to have the binary in your `$PATH` location e.g: `(/usr/local/bin)`. This is included in the provisioner package EKS of the TK8 CLI or can be found in the given link.
 
 ## Usage
 
-You can either use the cli to install a supported addon in an existing Kubernetes cluster or to provision and install Kubernetes on the supported platforms. The basic usage instructions are as below:
+We have described the different target platforms separately in detail in the documentation. But we would like to give you just one example using AWS.
 
-```shell
-Usage:
-  tk8 [command]
+You can get the binary in following ways:
+* Download the executable file for your operating system from the [release section](https://github.com/kubernauts/tk8/releases).
+* Use `go get -u github.com/kubernauts/tk8` to let `go` fetch the repo along with its dependencies and build the executable for you.
+* Build your own version using the `go build` command.
 
-Available Commands:
-  addon       Install kubernetes addon packages
-  cluster     Used to create kubernetes cluster on cloud infrastructures
-  help        Help about any command
+Create a separate folder and store the executable binary file there, a configuration file is also required. An example config file is available by the name [config.yaml.example](config.yaml.example). Add the necessary parameters for your cluster along with the AWS API credentials. Alternatively you should export the AWS API credentials in the environment variables because parts of the CLI (EKS cluster) needs them there.
 
-Flags:
-      --config string   uses the config.yaml
-  -h, --help            help for tk8
-  -t, --toggle          Help message for toggle
+`export AWS_SECRET_ACCESS_KEY=xxx`
+`export AWS_ACCESS_KEY_ID=xxx`
 
-Use "tk8 [command] --help" for more information about a command.
-```
+Then execute the CLI with the command:
+`tk8 cluster install aws`
 
-### Install a supported addon in an existing Kubernetes cluster
+With this command the TK8 CLI will create all of the required resources in AWS and installs Kubernetes on it.
 
-#### Using installed binary
+If you no longer need the cluster, you can use the command:
+`tk8 cluster destroy aws`
+to automatically remove all of the resources.
 
-```shell
-Usage:
-  tk8 addon [flags]
+## Add-Ons
 
-Flags:
-  -h, --help      help for addon
-  -m, --monitor   Deploy Monitoring and Alerting
-  -r, --rancher   Deploy Rancher
+You might want to check out our numerous add-ons for TK8: 
 
-Global Flags:
-      --config string   Path to the config.yaml
-```
+- [SonarQube](https://github.com/kubernauts/tk8-addon-sonarqube)
+- [GoCD](https://github.com/kubernauts/tk8-addon-gocd)
+- [Elasticsearch-Fluentd-Kibana](https://github.com/kubernauts/tk8-addon-efk)
+- [Pumba](https://github.com/kubernauts/tk8-addon-pumba)
+- [Heptio Contour](https://github.com/kubernauts/tk8-addon-contour)
+- [Traefik](https://github.com/kubernauts/tk8-addon-traefik)
+- [Argo CD](https://github.com/kubernauts/tk8-addon-argocd)
+- [Ambassador](https://github.com/kubernauts/tk8-addon-ambassador)
+- [CoreOS-Kube-Prometheus Stack](https://github.com/kubernauts/tk8-addon-kube-prometheus)
+- [Velero Minio](https://github.com/kubernauts/tk8-addon-velero-minio)
+- [CoreOS Vault operator](https://github.com/kubernauts/tk8-addon-vault-operator)
+- [Rancher](https://github.com/kubernauts/tk8-addon-rancher)
 
-#### Using Docker image
+(Please note, that the ReadMe's for the bottom two (Vault Operator, Rancher) are not ready yet. We will provide them shortly so you can explore these addons too!)
 
-```shell
-docker run -it --name tk8 -v ~/.kube/config:/root/.kube/config kubernautslabs/tk8 tk8 addon [flags]
-```
+Stay tuned as there is more to come from our lovely community and ourselfs! You can also develop your own add-ons, just check the passage below
 
-### Provision and install Kubernetes on the supported platforms
+## Contributing
 
-#### Using installed binary
+For provisioning the add-ons we have a separate [documentation](docs/en/add-on/introduction.md) and [examples](https://github.com/kubernauts/tk8-addon-develop) how you can build your extensions and integrate them into the TK8 project. You can also reach us at Slack.
 
-```shell
-Usage:
-  tk8 cluster [flags]
-  tk8 cluster [command]
+For a platform provider we have a separate [documentation](docs/en/add-on/development.md) which is only about integrating a platform in TK8. Here you will find detailed instructions and examples on how TK8 will execute your integration or you can also reach us in slack.
 
-Available Commands:
-  aws         Manages the infrastructure on AWS
-  baremetal   Manages the infrastructure on Baremetal
-  init        Initialise kubespray repository
-  openstack   Manages the infrastructure on Openstack
+To join the community and participate in the discussions going around, you can create an issue or get in touch with us in Slack.
 
-Flags:
-  -h, --help   help for cluster
+[Join us on Kubernauts Slack Channel](https://kubernauts-slack-join.herokuapp.com/)
 
-Global Flags:
-      --config string   Path to the config.yaml
+## Credits
 
-Use "tk8 cluster [command] --help" for more information about a command.
-```
+Founder and initiator of this project is [Arash Kaffamanesh](https://github.com/arashkaffamanesh) Founder and CEO of [Clouds Sky GmbH](https://cloudssky.com/de/) and [Kubernauts GmbH](https://kubernauts.de/en/home/)
 
-Specific platform instructions can be found in the [official documentation](https://kubernauts.gitbooks.io/tk8/content/) or in [docs](docs/)
+The project is supported by cloud computing experts from cloudssky GmbH and Kubernauts GmbH.
+[Christopher Adigun](https://github.com/infinitydon),
+[Arush Salil](https://github.com/arush-sal),
+[Manuel Müller](https://github.com/MuellerMH),
+[Nikita](https://github.com/niki-1905),
+[Anoop](https://github.com/anoopl)
 
-#### Using Docker image
+A big thanks goes to the contributors of [Kubespray](https://github.com/kubernetes-incubator/kubespray) whose great work we use as a basis for the setup and installation of Kubernetes in the AWS Cloud.
 
-```shell
-docker run -it --name tk8 -v ~/.ssh/id_rsa:/root/.ssh/id_rsa kubernautslabs/tk8 cluster [flags] [command]
-```
+Furthermore we would like to thank the contributors of [kubeadm](https://github.com/kubernetes/kubernetes/tree/master/cmd/kubeadm) which is currently not only part of the Kubespray project, but also of the TK8.
 
+Also a big thank you to [Wesley Charles Blake](https://github.com/WesleyCharlesBlake), on the basis of which we were able to offer our EKS integration.
 
+## License
 
+[Tk8 Apache License](LICENSE)
+[MIT License EKS](https://github.com/kubernauts/tk8eks/blob/master/LICENSE-Wesley-Charles-Blake)
+[MIT License EKS](https://github.com/kubernauts/tk8eks/blob/master/LICENSE)

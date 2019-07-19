@@ -1,4 +1,4 @@
-// Copyright © 2018 NAME HERE <EMAIL ADDRESS>
+// Copyright © 2018 The TK8 Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,10 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cmd
 
-import "github.com/kubernauts/tk8/cmd/cli"
+import (
+	"os"
 
-func main() {
-	cmd.Execute()
+	"github.com/spf13/cobra"
+)
+
+// clusterCmd represents the cluster command
+var clusterCmd = &cobra.Command{
+	Use:   "cluster",
+	Short: "Used to create kubernetes cluster on cloud infrastructures",
+	Long: `
+Used to initialize both the kubespray repo and the specified public infrastructure`,
+	Args: cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			cmd.Help()
+			os.Exit(0)
+		}
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(clusterCmd)
 }

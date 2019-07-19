@@ -15,14 +15,24 @@ _book
 *.mobi
 *.pdf
 
+.vscode
+.wakatime*
+
 #Ignore compiled files
 tk8
 dist
 bin
+inventory
+addons
+tk8-*
 
 # Ignore kubespray
 kubespray
+golint
 
 # Ignore personal configs
 config.yml
 config.yaml
+.scannerwork
+report.xml
+coverage.xml
